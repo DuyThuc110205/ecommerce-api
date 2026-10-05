@@ -1,0 +1,81 @@
+// use prisma-8
+
+model Role {
+  roleid   Int    @id @default(autoincrement())
+  rolename VarChar(50)
+
+  users User[]
+
+  @@map("Role")
+}
+
+model Membership {
+  mid   Int       @id @default(autoincrement())
+  mname VarChar(50)
+  score Int
+
+  users User[]
+
+  @@map("Membership")
+}
+
+model User {
+  uid      Int        @id @default(autoincrement())
+  username VarChar(50)
+  fullname VarChar(100)
+  password VarChar(255)
+  roleid   Int
+  mid      Int
+
+  role       Role       @relation(fields: [roleid], references: [roleid])
+  membership Membership @relation(fields: [mid], references: [mid])
+  orders     Order[]
+
+  @@map("User")
+}
+
+model Product {
+  pid      Int          @id @default(autoincrement())
+  pname    VarChar(100)
+  price    Numeric(10, 2)
+  quantity Int
+
+  orderDetails OrderDetail[]
+
+  @@map("Product")
+}
+
+model Order {
+  oid      Int       @id @default(autoincrement())
+  uid      Int
+  createat Timestamp
+
+  user         User          @relation(fields: [uid], references: [uid])
+  orderDetails OrderDetail[]
+  shipments    Shipment[]
+
+  @@map("Order")
+}
+
+model OrderDetail {
+  oid        Int
+  pid        Int
+  qty        Int
+  unit_price Numeric(10, 2)
+
+  order   Order   @relation(fields: [oid], references: [oid])
+  product Product @relation(fields: [pid], references: [pid])
+
+  @@id([oid, pid])
+  @@map("OrderDetail")
+}
+
+model Shipment {
+  shipid Int       @id @default(autoincrement())
+  oid    Int
+  status VarChar(50)
+
+  order Order @relation(fields: [oid], references: [oid])
+
+  @@map("Shipment")
+}
