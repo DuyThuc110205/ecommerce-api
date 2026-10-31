@@ -83,11 +83,22 @@ export const createOrder = async (req, res) => {
             );
         }
 
+        // Tự động tạo phiếu giao hàng
+        const shipmentResult = await client.query(
+            `INSERT INTO "Shipment" (oid, status)
+             VALUES ($1, $2)
+             RETURNING shipid, oid, status`,
+            [order.oid, "PENDING"]
+        );
+
+        const shipment = shipmentResult.rows[0];
+
         await client.query("COMMIT");
 
         res.status(201).json({
             message: "Tạo đơn hàng thành công",
-            order
+            order,
+            shipment
         });
 
     } catch (error) {
